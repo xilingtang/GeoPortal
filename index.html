@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>map</title>
+
+  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+
+  <style>
+    body { margin: 0; }
+    #map { width: 100%; height: 100vh; }
+
+    #panel {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      background: white;
+      padding: 10px;
+      width: 240px;
+      max-height: 90vh;
+      overflow-y: auto;
+      font-size: 14px;
+      border-radius: 6px;
+    }
+
+    .group-title {
+      font-weight: bold;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .layer-item {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+
+<body>
+<div id="map"></div>
+<div id="panel"></div>
+
+<script>
+// ================== 1. 初始化地图 ==================
+const map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://demotiles.maplibre.org/style.json',
+  center: [35.85, 32.30],
+  zoom: 9
+});
+
+// ================== 2. 图层配置（13个） ==================
+const layerConfig = [
+  {
+    group: "postoffice",
+    layers: [
+      { id: "postoffice_afg", name: "postoffice_afg", url: "data/postoffice_afg.geojson" },
+      { id: "postoffice_col", name: "postoffice_col", url: "data/postoffice_col.geojson" },
+      { id: "postoffice_com", name: "postoffice_com", url: "data/postoffice_com.geojson" },
+      { id: "postoffice_jor", name: "postoffice_jor", url: "data/postoffice_jor.geojson" },
+      { id: "postoffice_khm", name: "postoffice_khm", url: "data/postoffice_khm.geojson" },
+      { id: "postoffice_pan", name: "postoffice_pan", url: "data/postoffice_pan.geojson" },
+      { id: "postoffice_sdn", name: "postoffice_sdn", url: "data/postoffice_sdn.geojson" },
+      { id: "postoffice_som", name: "postoffice_som", url: "data/postoffice_som.geojson" },
+      { id: "postoffice_swz", name: "postoffice_swz", url: "data/postoffice_swz.geojson" },
+      { id: "postoffice_tca", name: "postoffice_tca", url: "data/postoffice_tca.geojson" },
+      { id: "postoffice_tgo", name: "postoffice_tgo", url: "data/postoffice_tgo.geojson" },
+      { id: "postoffice_tto", name: "postoffice_tto", url: "data/postoffice_tto.geojson" },
+      { id: "postoffice_ury", name: "postoffice_ury", url: "data/postoffice_ury.geojson" }
+    ]
+  }
+];
+
+// ================== 3. 加载所有图层 ==================
+map.on('load', async () => {
+
+  for (const group of layerConfig) {
+    for (const layer of group.layers) {
+
+      // 读取 GeoJSON
+      const response = await fetch(layer.url);
+      const geojson = await response.json();
+
+      // 添加数据源
+      map.addSource(layer.id, {
+        type: 'geojson',
+        data: geojson
+      });
+
+      // 添加图层（点图层）
+      map.addLayer({
+        id: layer.id,
+        type: 'circle',
+        source: layer.id,
+        paint: {
+          'circle-radius': 3,
+          'circle-color': '#ff0000'
+        }
+      });
+
+    }
+  }
+
+  // 创建面板
+  createLayerPanel();
+});
+
+// ================== 4. 图层控制面板 ==================
+function createLayerPanel() {
+  const panel = document.getElementById('panel');
+
+  layerConfig.forEach(group => {
+
+    const title = document.createElement('div');
+    title.className = 'group-title';
+    title.innerText = group.group;
+
+    const content = document.createElement('div');
+
+    title.onclick = () => {
+      content.style.display =
+        content.style.display === 'none' ? 'block' : 'none';
+    };
+
+    group.layers.forEach(layer => {
+
+      const item = document.createElement('div');
+      item.className = 'layer-item';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = true;
+
+      checkbox.onchange = () => {
+        map.setLayoutProperty(
+          layer.id,
+          'visibility',
+          checkbox.checked ? 'visible' : 'none'
+        );
+      };
+
+      const label = document.createElement('span');
+      label.innerText = layer.name;
+
+      item.appendChild(checkbox);
+      item.appendChild(label);
+      content.appendChild(item);
+
+    });
+
+    panel.appendChild(title);
+    panel.appendChild(content);
+  });
+}
+
+
+</script>
+</body>
+</html>

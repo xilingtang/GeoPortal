@@ -1,0 +1,11 @@
+{
+"type": "FeatureCollection",
+"name": "postoffice_tca",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "ISO-2": "TC", "ISO-3": "TCA", "Country_Name": "Turks and Caicos Islands", "id_Post_Office": null, "Name_Post_Office": "Providenciales Post Office", "Postal_Region_EN": "Providenciales", "Postal_Region_alias": null, "Postal_Sector": "Downtown", "Postal_Office": null, "Address": "George Brown Post Office Building, 6 Airport Road", "Postal_Code": "TKCA 1ZZ", "LONGITUDE": -72.257917, "LATITUDE": 21.7775, "PO_TYPE": null }, "geometry": { "type": "Point", "coordinates": [ -72.257917, 21.7775 ] } },
+{ "type": "Feature", "properties": { "ISO-2": "TC", "ISO-3": "TCA", "Country_Name": "Turks and Caicos Islands", "id_Post_Office": null, "Name_Post_Office": "Grand Turk Post Office", "Postal_Region_EN": "Grand Turk", "Postal_Region_alias": null, "Postal_Sector": "Cockburn Town", "Postal_Office": null, "Address": "Peter Williams Building, Church Folly", "Postal_Code": "TKCA 1ZZ", "LONGITUDE": -71.142028, "LATITUDE": 21.467167, "PO_TYPE": null }, "geometry": { "type": "Point", "coordinates": [ -71.142028, 21.467167 ] } },
+{ "type": "Feature", "properties": { "ISO-2": "TC", "ISO-3": "TCA", "Country_Name": "Turks and Caicos Islands", "id_Post_Office": null, "Name_Post_Office": "South Caicos Post Office", "Postal_Region_EN": "South Caicos", "Postal_Region_alias": null, "Postal_Sector": "Cockburn Habour", "Postal_Office": null, "Address": "Department of Motor Vehicles Building, Government Complex, Fourth Street", "Postal_Code": "TKCA 1ZZ", "LONGITUDE": -71.530056, "LATITUDE": 21.49, "PO_TYPE": null }, "geometry": { "type": "Point", "coordinates": [ -71.530056, 21.49 ] } },
+{ "type": "Feature", "properties": { "ISO-2": "TC", "ISO-3": "TCA", "Country_Name": "Turks and Caicos Islands", "id_Post_Office": null, "Name_Post_Office": "North Caicos Post Office", "Postal_Region_EN": "North Caicos", "Postal_Region_alias": null, "Postal_Sector": "Bottle Creek", "Postal_Office": null, "Address": "Hon. Paul Higgs Sr. Building, District Commissioner's Office", "Postal_Code": "TKCA 1ZZ", "LONGITUDE": -71.917806, "LATITUDE": 21.883306, "PO_TYPE": null }, "geometry": { "type": "Point", "coordinates": [ -71.917806, 21.883306 ] } }
+]
+}

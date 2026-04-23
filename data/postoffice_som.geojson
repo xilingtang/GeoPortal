@@ -1,0 +1,9 @@
+{
+"type": "FeatureCollection",
+"name": "postoffice_som",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "ISO-2": "SO", "ISO-3": "SOM", "Country_Name": "Somalia", "id_Post_Office": null, "Name_Post_Office": null, "Postal_Region_EN": "Banaadir", "Postal_Region_alias": null, "Postal_Sector": null, "Postal_Office": "Mogadishu Airport", "Address": null, "Postal_Code": null, "LONGITUDE": 45.304466, "LATITUDE": 2.018183, "PO_TYPE": "Main" }, "geometry": { "type": "Point", "coordinates": [ 45.304466, 2.018183 ] } },
+{ "type": "Feature", "properties": { "ISO-2": "SO", "ISO-3": "SOM", "Country_Name": "Somalia", "id_Post_Office": null, "Name_Post_Office": null, "Postal_Region_EN": "Banaadir", "Postal_Region_alias": null, "Postal_Sector": null, "Postal_Office": "Mogadishu Gpo", "Address": null, "Postal_Code": null, "LONGITUDE": 45.34716222, "LATITUDE": 2.040212561, "PO_TYPE": "Main" }, "geometry": { "type": "Point", "coordinates": [ 45.34716222, 2.040212561 ] } }
+]
+}
