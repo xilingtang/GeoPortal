@@ -44,9 +44,28 @@
 // ================== 1. 初始化地图 ==================
 const map = new maplibregl.Map({
   container: 'map',
-  style: 'https://demotiles.maplibre.org/style.json',
+  style: {
+    version: 8,
+    sources: {
+      'arcgis-tiles': {
+        type: 'raster',
+        tiles: [
+          'https://pro-ags1.dfs.un.org/arcgis/rest/services/ClearMap_WebPlain/MapServer/tile/{z}/{y}/{x}'
+        ],
+        tileSize: 256,
+        attribution: '© UN Maps ClearMap'
+      }
+    },
+    layers: [
+      {
+        id: 'arcgis-layer',
+        type: 'raster',
+        source: 'arcgis-tiles'
+      }
+    ]
+  },
   center: [35.85, 32.30],
-  zoom: 9
+  zoom: 1
 });
 
 // ================== 2. 图层配置（13个） ==================
