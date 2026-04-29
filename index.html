@@ -41,7 +41,7 @@
 <div id="panel"></div>
 
 <script>
-// ================== 1. 初始化地图 ==================
+// ================== 初始化地图 ==================
 const map = new maplibregl.Map({
   container: 'map',
   style: {
@@ -68,10 +68,10 @@ const map = new maplibregl.Map({
   zoom: 1
 });
 
-// ================== 2. 图层配置（13个） ==================
+// ================== 图层配置 ==================
 const layerConfig = [
   {
-    group: "postoffice",
+    group: "Post Office",
     layers: [
       { id: "postoffice_afg", name: "postoffice_afg", url: "data/postoffice_afg.geojson" },
       { id: "postoffice_col", name: "postoffice_col", url: "data/postoffice_col.geojson" },
@@ -90,7 +90,7 @@ const layerConfig = [
   }
 ];
 
-// ================== 3. 加载所有图层 ==================
+// ================== 加载所有图层 ==================
 map.on('load', async () => {
 
   for (const group of layerConfig) {
@@ -117,29 +117,55 @@ map.on('load', async () => {
         }
       });
 
+      // 点击弹窗
+      map.on('click', layer.id, (e) => {
+        const properties = e.features[0].properties;
+
+        let html = '';
+        for (const key in properties) {
+          html += `<b>${key}:</b> ${properties[key]}<br>`;
+        }
+
+        new maplibregl.Popup()
+          .setLngLat(e.lngLat)
+          .setHTML(html)
+          .addTo(map);
+      });
+
+      // 鼠标变手型
+      map.on('mouseenter', layer.id, () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+
+      map.on('mouseleave', layer.id, () => {
+        map.getCanvas().style.cursor = '';
+      });
+
     }
   }
 
-  // 创建面板
-  createLayerPanel();
 });
 
-// ================== 4. 图层控制面板 ==================
+  // 创建面板
+  createLayerPanel();
+
+// ================== 图层控制面板 ==================
 function createLayerPanel() {
   const panel = document.getElementById('panel');
 
   layerConfig.forEach(group => {
 
-    const title = document.createElement('div');
-    title.className = 'group-title';
-    title.innerText = group.group;
+    const details = document.createElement('details');
+    details.open = false; 
+
+    const summary = document.createElement('summary');
+    summary.className = 'group-title';
+    summary.innerText = group.group; 
+
+    details.appendChild(summary);
 
     const content = document.createElement('div');
-
-    title.onclick = () => {
-      content.style.display =
-        content.style.display === 'none' ? 'block' : 'none';
-    };
+    content.className = 'group-content';
 
     group.layers.forEach(layer => {
 
@@ -167,8 +193,8 @@ function createLayerPanel() {
 
     });
 
-    panel.appendChild(title);
-    panel.appendChild(content);
+    details.appendChild(content);
+    panel.appendChild(details);
   });
 }
 
