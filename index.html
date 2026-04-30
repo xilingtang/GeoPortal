@@ -39,9 +39,10 @@
 <body>
 <div id="map"></div>
 <div id="panel"></div>
+<div id="legend" class="legend"></div>
 
 <script>
-// ================== 初始化地图 ==================
+// 初始化地图
 const map = new maplibregl.Map({
   container: 'map',
   style: {
@@ -68,7 +69,8 @@ const map = new maplibregl.Map({
   zoom: 1
 });
 
-// ================== 图层配置 ==================
+
+// 图层配置
 const layerConfig = [
   {
     group: "Post Office",
@@ -87,117 +89,375 @@ const layerConfig = [
       { id: "postoffice_tto", name: "postoffice_tto", url: "data/postoffice_tto.geojson" },
       { id: "postoffice_ury", name: "postoffice_ury", url: "data/postoffice_ury.geojson" }
     ]
+  },
+
+  {
+    group: "2IPD",
+    subgroups: [
+      {
+        name: "2025",
+        layers: [
+          { id: "2IPD_2025_PDL", name: "2IPD_2025_PDL", url: "data/2IPD_2025_PDL.geojson" },
+          { id: "2IPD_2025_Reliability", name: "2IPD_2025_Reliability", url: "data/2IPD_2025_Reliability.geojson" },
+          { id: "2IPD_2025_Reach", name: "2IPD_2025_Reach", url: "data/2IPD_2025_Reach.geojson" },
+          { id: "2IPD_2025_Relevance", name: "2IPD_2025_Relevance", url: "data/2IPD_2025_Relevance.geojson" },
+          { id: "2IPD_2025_Resilience", name: "2IPD_2025_Resilience", url: "data/2IPD_2025_Resilience.geojson" },
+          { id: "2IPD_2025_Bonus", name: "2IPD_2025_Bonus", url: "data/2IPD_2025_Bonus.geojson" },
+          { id: "2IPD_2025_Score before bonus", name: "2IPD_2025_Score before bonus", url: "data/2IPD_2025_Score before bonus.geojson" },
+          { id: "2IPD_2025_Score after bonus", name: "2IPD_2025_Score after bonus", url: "data/2IPD_2025_Score after bonus.geojson" }
+        ]
+      }
+    ]
   }
 ];
 
-// ================== 加载所有图层 ==================
+
+// 工具函数
+function toggleLayer(id, visible) {
+  if (!map.getLayer(id)) return;
+
+  map.setLayoutProperty(
+    id,
+    'visibility',
+    visible ? 'visible' : 'none'
+  );
+}
+
+function getPaint(layer, geometry) {
+
+  // 2IPD PDL（分类渲染）
+  if (layer.id === "2IPD_2025_PDL") {
+    return {
+      "fill-color": [
+        "match",
+        ["get", "2IPD_2025_PDL"],
+
+        1, "#c4161c",
+        2, "#f15e38",
+        3, "#f58221",
+        4, "#e5a150",
+        5, "#fcdb6e",
+        6, "#9ccf81",
+        7, "#5ebe90",
+        8, "#2eb668",
+        9, "#13a449",
+        10, "#149145",
+
+        "#cccccc"
+      ],
+      "fill-opacity": 0.7,
+      "fill-outline-color": "#000000"
+    };
+  }
+
+  // Polygon
+  if (geometry === 'Polygon' || geometry === 'MultiPolygon') {
+    return {
+      'fill-color': '#ff0000',
+      'fill-opacity': 0.5,
+      'fill-outline-color': '#000000'
+    };
+  }
+
+  // Line
+  if (geometry === 'LineString' || geometry === 'MultiLineString') {
+    return {
+      'line-color': '#ff0000',
+      'line-width': 2
+    };
+  }
+
+  // Point（默认）
+  return {
+    'circle-radius': 3,
+    'circle-color': '#ff0000'
+  };
+}
+
+function updateLegend(layerId) {
+
+  const legend = document.getElementById('legend');
+  legend.innerHTML = ''; // 清空
+  legend.style.display = 'block'; 
+
+  // 2IPD_PDL
+  if (layerId.startsWith('2IPD')) {
+    createPDLLegend(legend);
+    return;
+  }
+
+  // Post Office
+  if (layerId.startsWith('postoffice')) {
+    createPointLegend(legend);
+    return;
+  }
+
+  // 默认
+  legend.style.display = 'none';
+}
+
+function createPointLegend(container) {
+
+  container.style.display = 'block';
+
+  const title = document.createElement('div');
+  title.innerText = 'Post Office';
+  title.style.fontWeight = 'bold';
+  title.style.marginBottom = '6px';
+
+  container.appendChild(title);
+
+  const item = document.createElement('div');
+
+  const dot = document.createElement('span');
+  dot.style.width = '10px';
+  dot.style.height = '10px';
+  dot.style.backgroundColor = '#ff0000';
+  dot.style.borderRadius = '50%';
+  dot.style.display = 'inline-block';
+  dot.style.marginRight = '6px';
+
+  const label = document.createElement('span');
+  label.innerText = 'Location';
+
+  item.appendChild(dot);
+  item.appendChild(label);
+  container.appendChild(item);
+}
+
+function createPDLLegend(container) {
+
+  container.style.display = 'block';
+
+  const title = document.createElement('div');
+  title.innerText = 'PDL';
+  title.style.fontWeight = 'bold';
+  title.style.marginBottom = '6px';
+
+  container.appendChild(title);
+
+  const PDL_COLORS = {
+    1: "#c4161c",
+    2: "#f15e38",
+    3: "#f58221",
+    4: "#e5a150",
+    5: "#fcdb6e",
+    6: "#9ccf81",
+    7: "#5ebe90",
+    8: "#2eb668",
+    9: "#13a449",
+    10: "#149145"
+  };
+
+  for (let i = 1; i <= 10; i++) {
+
+    const item = document.createElement('div');
+    item.style.display = 'flex';
+    item.style.alignItems = 'center';
+    item.style.marginBottom = '4px';
+
+    const colorBox = document.createElement('span');
+    colorBox.style.width = '16px';
+    colorBox.style.height = '16px';
+    colorBox.style.backgroundColor = PDL_COLORS[i];
+    colorBox.style.marginRight = '6px';
+
+    const label = document.createElement('span');
+    label.innerText = i;
+
+    item.appendChild(colorBox);
+    item.appendChild(label);
+    container.appendChild(item);
+  }
+}
+
+
+// 加载所有图层
 map.on('load', async () => {
 
-  for (const group of layerConfig) {
-    for (const layer of group.layers) {
+  const allLayers = [];
 
-      // 读取 GeoJSON
-      const response = await fetch(layer.url);
-      const geojson = await response.json();
-
-      // 添加数据源
-      map.addSource(layer.id, {
-        type: 'geojson',
-        data: geojson
-      });
-
-      // 添加图层（点图层）
-      map.addLayer({
-        id: layer.id,
-        type: 'circle',
-        source: layer.id,
-        paint: {
-          'circle-radius': 3,
-          'circle-color': '#ff0000'
-        }
-      });
-
-      // 点击弹窗
-      map.on('click', layer.id, (e) => {
-        const properties = e.features[0].properties;
-
-        let html = '';
-        for (const key in properties) {
-          html += `<b>${key}:</b> ${properties[key]}<br>`;
-        }
-
-        new maplibregl.Popup()
-          .setLngLat(e.lngLat)
-          .setHTML(html)
-          .addTo(map);
-      });
-
-      // 鼠标变手型
-      map.on('mouseenter', layer.id, () => {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-
-      map.on('mouseleave', layer.id, () => {
-        map.getCanvas().style.cursor = '';
-      });
-
+  // 扁平化图层
+  layerConfig.forEach(group => {
+    if (group.layers) {
+      allLayers.push(...group.layers);
     }
+    if (group.subgroups) {
+      group.subgroups.forEach(sub => {
+        allLayers.push(...sub.layers);
+      });
+    }
+  });
+
+  // 并行加载
+  const promises = allLayers.map(layer =>
+    fetch(layer.url)
+      .then(res => res.json())
+      .catch(err => {
+        console.error(`Failed to load: ${layer.id}`, err);
+        return null;
+      })
+  );
+
+  const results = await Promise.all(promises);
+
+// 添加图层
+allLayers.forEach((layer, index) => {
+
+  const geojson = results[index];
+  if (!geojson || !geojson.features?.length) return;
+
+  map.addSource(layer.id, {
+    type: 'geojson',
+    data: geojson
+  });
+
+  // ✅ 获取 geometry 类型
+  const geometry = geojson.features[0].geometry.type;
+
+  // ✅ 自动判断 layerType
+  let layerType = 'circle';
+
+  if (geometry === 'Polygon' || geometry === 'MultiPolygon') {
+    layerType = 'fill';
   }
+
+  if (geometry === 'LineString' || geometry === 'MultiLineString') {
+    layerType = 'line';
+  }
+
+  // ✅ 添加图层
+  map.addLayer({
+    id: layer.id,
+    type: layerType,
+    source: layer.id,
+    layout: {
+      visibility: "none"
+    },
+    paint: getPaint(layer, geometry)
+  });
 
 });
 
-  // 创建面板
+    //  popup 
+    map.on('click', layer.id, (e) => {
+      const properties = e.features[0].properties;
+
+      let html = '';
+      for (const key in properties) {
+        html += `<b>${key}:</b> ${properties[key]}<br>`;
+      }
+
+      new maplibregl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(html)
+        .addTo(map);
+    });
+
+    // hover 
+    map.on('mouseenter', layer.id, () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on('mouseleave', layer.id, () => {
+      map.getCanvas().style.cursor = '';
+    });
+
+  });
+
+
+// 创建面板
   createLayerPanel();
 
-// ================== 图层控制面板 ==================
+// 图层控制面板
 function createLayerPanel() {
   const panel = document.getElementById('panel');
 
   layerConfig.forEach(group => {
 
     const details = document.createElement('details');
-    details.open = false; 
+    details.open = false;
 
     const summary = document.createElement('summary');
     summary.className = 'group-title';
-    summary.innerText = group.group; 
+    summary.innerText = group.group;
 
     details.appendChild(summary);
 
     const content = document.createElement('div');
     content.className = 'group-content';
 
-    group.layers.forEach(layer => {
+    // Post Office
+    if (group.layers) {
+      group.layers.forEach(layer => {
+        content.appendChild(createLayerItem(layer));
+      });
+    }
 
-      const item = document.createElement('div');
-      item.className = 'layer-item';
+    // 2IPD
+    if (group.subgroups) {
+      group.subgroups.forEach(sub => {
 
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.checked = true;
+        const subTitle = document.createElement('div');
+        subTitle.innerText = sub.name; 
+        subTitle.style.fontWeight = "bold";
+        subTitle.style.margin = "8px 0 4px 0";
 
-      checkbox.onchange = () => {
-        map.setLayoutProperty(
-          layer.id,
-          'visibility',
-          checkbox.checked ? 'visible' : 'none'
-        );
-      };
+        content.appendChild(subTitle);
 
-      const label = document.createElement('span');
-      label.innerText = layer.name;
+        sub.layers.forEach(layer => {
+          content.appendChild(createLayerItem(layer));
+        });
 
-      item.appendChild(checkbox);
-      item.appendChild(label);
-      content.appendChild(item);
-
-    });
+      });
+    }
 
     details.appendChild(content);
     panel.appendChild(details);
   });
 }
 
+function createLayerItem(layer) {
+  const item = document.createElement('div');
+  item.className = 'layer-item';
+
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.checked = false;
+
+  checkbox.onchange = () => {
+
+    // 控制图层显示
+    toggleLayer(layer.id, checkbox.checked);
+
+    // legend 控制 
+    if (checkbox.checked) {
+      // 勾选 → 更新 legend
+      updateLegend(layer.id);
+    } else {
+      // 取消 → 检查是否还有其他图层打开
+      const anyChecked = document.querySelectorAll(
+        '.layer-item input:checked'
+      ).length > 0;
+
+      if (!anyChecked) {
+        // 没有任何图层 → 隐藏 legend
+        const legend = document.getElementById('legend');
+        legend.innerHTML = '';
+        legend.style.display = 'none';
+      }
+    }
+
+  };
+
+  const label = document.createElement('span');
+  label.innerText = layer.name;
+
+  item.appendChild(checkbox);
+  item.appendChild(label);
+
+  return item;
+}
 
 </script>
 </body>
