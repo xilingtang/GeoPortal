@@ -1,47 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>Postal Network</title>
+<meta charset="utf-8" />
+<title>Postal Network</title>
 
-  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
-  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 
-  <style>
-    body { margin: 0; }
-    #map { width: 100%; height: 100vh; }
+<style>
+body { margin: 0; }
 
-    #panel {
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      background: white;
-      padding: 10px;
-      width: 240px;
-      max-height: 90vh;
-      overflow-y: auto;
-      font-size: 14px;
-      border-radius: 6px;
-    }
+#map { width: 100%; height: 100vh; }
 
-    .group-title {
-      font-weight: bold;
-      margin-top: 10px;
-      cursor: pointer;
-    }
+#panel {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  background: white;
+  padding: 10px;
+  width: 260px;
+  border-radius: 6px;
+  font-size: 14px;
+}
 
-    .layer-item {
-      margin-left: 10px;
-    }
-  </style>
+#legend {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+}
+</style>
 </head>
 
 <body>
+
 <div id="map"></div>
 <div id="panel"></div>
-<div id="legend" class="legend"></div>
+<div id="legend"></div>
 
 <script>
+
 // 初始化地图
 const map = new maplibregl.Map({
   container: 'map',
@@ -102,8 +102,8 @@ const layerConfig = [
           { id: "2IPD_2025_Reach", name: "2IPD_2025_Reach", url: "data/2IPD_2025_Reach.geojson" },
           { id: "2IPD_2025_Relevance", name: "2IPD_2025_Relevance", url: "data/2IPD_2025_Relevance.geojson" },
           { id: "2IPD_2025_Resilience", name: "2IPD_2025_Resilience", url: "data/2IPD_2025_Resilience.geojson" },
-          { id: "2IPD_2025_Bonus", name: "2IPD_2025_Bonus", url: "data/2IPD_2025_Bonus.geojson" },
           { id: "2IPD_2025_Score before bonus", name: "2IPD_2025_Score before bonus", url: "data/2IPD_2025_Score before bonus.geojson" },
+          { id: "2IPD_2025_Bonus", name: "2IPD_2025_Bonus", url: "data/2IPD_2025_Bonus.geojson" },
           { id: "2IPD_2025_Score after bonus", name: "2IPD_2025_Score after bonus", url: "data/2IPD_2025_Score after bonus.geojson" }
         ]
       }
@@ -125,7 +125,7 @@ function toggleLayer(id, visible) {
 
 function getPaint(layer, geometry) {
 
-  // 2IPD PDL（分类渲染）
+  // 2IPD_2025_PDL（分类渲染）
   if (layer.id === "2IPD_2025_PDL") {
     return {
       "fill-color": [
@@ -145,10 +145,111 @@ function getPaint(layer, geometry) {
 
         "#cccccc"
       ],
-      "fill-opacity": 0.7,
+      "fill-opacity": 0.8,
       "fill-outline-color": "#000000"
     };
   }
+
+  // 2IPD_2025_Reliability（浅蓝 → 深蓝）
+ if (layer.id === "2IPD_2025_Reliability") {
+    return {
+      "fill-color": [
+        "interpolate", ["linear"],
+        ["to-number", ["get", "2IPD_2025_Reliability"]],
+        0, "#eff3ff",   
+        100, "#08306b"   
+      ],
+      "fill-opacity": 0.8,
+      "fill-outline-color": "#000000"
+    };
+  }
+
+  // 2IPD_2025_Reach（浅绿 → 深绿）
+  if (layer.id === "2IPD_2025_Reach") {
+    return {
+      "fill-color": [
+        "interpolate", ["linear"],
+        ["to-number", ["get", "2IPD_2025_Reach"]],
+        0, "#e5f5e0",   
+        100, "#00441b"   
+      ],
+      "fill-opacity": 0.8,
+      "fill-outline-color": "#000000"
+    };
+  }
+
+  // 2IPD_2025_Relevance（浅黄 → 深黄）
+  if (layer.id === "2IPD_2025_Relevance") {
+    return {
+      "fill-color": [
+        "interpolate", ["linear"],
+        ["to-number", ["get", "2IPD_2025_Relevance"]],
+        0, "#ffffe5",    
+        100, "#ffb300"    
+      ],
+      "fill-opacity": 0.8,
+      "fill-outline-color": "#000000"
+    };
+  }
+
+  // 2IPD_2025_Resilience（浅紫 → 深紫）
+  if (layer.id === "2IPD_2025_Resilience") {
+    return {
+      "fill-color": [
+        "interpolate", ["linear"],
+        ["to-number", ["get", "2IPD_2025_Resilience"]],
+        0, "#efedf5",     
+        100, "#3f007d"    
+      ],
+      "fill-opacity": 0.8,
+      "fill-outline-color": "#000000"
+    };
+  }
+
+  // 2IPD_2025_Score before bonus（红 → 绿）
+  if (layer.id === "2IPD_2025_Score before bonus") {
+    return {
+      "fill-color": [
+        "interpolate", ["linear"],
+        ["to-number", ["get", "2IPD_2025_Score before bonus"]],
+        0, "#b10026",    // 红
+        50, "#ffffbf",   // 黄（中间）
+        100, "#006837"   // 绿   
+      ],
+      "fill-opacity": 0.8,
+      "fill-outline-color": "#000000"
+    };
+  }
+
+    // 2IPD_2025_Bonus（浅红 → 深红）
+  if (layer.id === "2IPD_2025_Bonus") {
+    return {
+      "fill-color": [
+        "interpolate", ["linear"],
+        ["to-number", ["get", "2IPD_2025_Bonus"]],
+        0, "#fcbba1",     
+        10, "#b10026"    
+      ],
+      "fill-opacity": 0.8,
+      "fill-outline-color": "#000000"
+    };
+  }
+
+    // 2IPD_2025_Score after bonus（深红 → 深绿）
+  if (layer.id === "2IPD_2025_Score after bonus") {
+    return {
+      "fill-color": [
+        "interpolate", ["linear"],
+        ["to-number", ["get", "2IPD_2025_Score after bonus"]],
+        0, "#b10026",    // 红
+        50, "#ffffbf",   // 黄（中间）
+        100, "#006837"   // 绿    
+      ],
+      "fill-opacity": 0.8,
+      "fill-outline-color": "#000000"
+    };
+  }
+
 
   // Polygon
   if (geometry === 'Polygon' || geometry === 'MultiPolygon') {
@@ -156,14 +257,6 @@ function getPaint(layer, geometry) {
       'fill-color': '#ff0000',
       'fill-opacity': 0.5,
       'fill-outline-color': '#000000'
-    };
-  }
-
-  // Line
-  if (geometry === 'LineString' || geometry === 'MultiLineString') {
-    return {
-      'line-color': '#ff0000',
-      'line-width': 2
     };
   }
 
@@ -312,10 +405,10 @@ allLayers.forEach((layer, index) => {
     data: geojson
   });
 
-  // ✅ 获取 geometry 类型
+  // 获取 geometry 类型
   const geometry = geojson.features[0].geometry.type;
 
-  // ✅ 自动判断 layerType
+  // 自动判断 layerType
   let layerType = 'circle';
 
   if (geometry === 'Polygon' || geometry === 'MultiPolygon') {
@@ -326,7 +419,7 @@ allLayers.forEach((layer, index) => {
     layerType = 'line';
   }
 
-  // ✅ 添加图层
+  // 添加图层
   map.addLayer({
     id: layer.id,
     type: layerType,
@@ -339,7 +432,7 @@ allLayers.forEach((layer, index) => {
 
 });
 
-    //  popup 
+  //  popup 
     map.on('click', layer.id, (e) => {
       const properties = e.features[0].properties;
 
@@ -434,6 +527,9 @@ function createLayerItem(layer) {
     if (checkbox.checked) {
       // 勾选 → 更新 legend
       updateLegend(layer.id);
+            const anyChecked = document.querySelectorAll(
+        '.layer-item input:checked'
+      ).length > 0;
     } else {
       // 取消 → 检查是否还有其他图层打开
       const anyChecked = document.querySelectorAll(
