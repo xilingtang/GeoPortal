@@ -480,7 +480,7 @@ map.on('load', async () => {
     }
   });
 
-  // 并行加载
+  // 加载数据
   const results = await Promise.all(
     allLayers.map(layer =>
       fetch(layer.url)
@@ -492,13 +492,13 @@ map.on('load', async () => {
     )
   );
 
-  // 复用 popup（避免叠加）
+  // 单例 popup
   const popup = new maplibregl.Popup({
     closeButton: true,
-    closeOnClick: true
+    closeOnClick: false
   });
 
-  // 添加图层 + 绑定事件
+  // 添加图层（默认隐藏）
   allLayers.forEach((layer, index) => {
 
     const geojson = results[index];
@@ -519,26 +519,8 @@ map.on('load', async () => {
       id: layer.id,
       type: layerType,
       source: layer.id,
-      layout: { visibility: "none" },
+      layout: { visibility: "none" }, // 默认隐藏
       paint: getPaint(layer, geometry)
-    });
-
-    // click popup（绑定在这里）
-    map.on('click', layer.id, (e) => {
-
-      if (!e.features || !e.features.length) return;
-
-      const properties = e.features[0].properties;
-
-      let html = '';
-      for (const key in properties) {
-        html += `<div><b>${key}:</b> ${properties[key]}</div>`;
-      }
-
-      popup
-        .setLngLat(e.lngLat)
-        .setHTML(html)
-        .addTo(map);
     });
 
     // hover
@@ -551,6 +533,51 @@ map.on('load', async () => {
     });
 
   });
+
+  // 获取“当前可见图层”
+  function getVisibleLayerIds() {
+    return allLayers
+      .map(l => l.id)
+      .filter(id => map.getLayer(id) && map.getLayoutProperty(id, 'visibility') === 'visible');
+  }
+
+  // 统一 click
+  map.on('click', (e) => {
+
+    // 永远先关闭
+    popup.remove();
+
+    const visibleLayers = getVisibleLayerIds();
+
+    if (!visibleLayers.length) return;
+
+    const features = map.queryRenderedFeatures(e.point, {
+      layers: visibleLayers
+    });
+
+    if (!features.length) return;
+
+    const feature = features[0];
+    const properties = feature.properties;
+
+    let html = '';
+    for (const key in properties) {
+      html += `<div><b>${key}:</b> ${properties[key]}</div>`;
+    }
+
+    popup
+      .setLngLat(e.lngLat)
+      .setHTML(html)
+      .addTo(map);
+  });
+
+
+  // 图层切换
+  window.toggleLayer = function(layerId, visible) {
+    map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+    // 切换图层时强制关闭 popup
+    popup.remove();
+  };
 
 });
 
